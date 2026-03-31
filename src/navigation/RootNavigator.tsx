@@ -2,7 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
 import { LearnStack } from './LearnStack';
-import { PracticeScreen } from '../screens/practice/PracticeScreen';
+import { PracticeStack } from './PracticeStack';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { Colors, FontSize } from '../constants/theme';
 
@@ -42,7 +42,7 @@ export const RootNavigator: React.FC = () => {
       })}
     >
       <Tab.Screen name="Learn" component={LearnStack} />
-      <Tab.Screen name="Practice" component={PracticeScreen} />
+      <Tab.Screen name="Practice" component={PracticeStack} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

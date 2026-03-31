@@ -86,3 +86,8 @@ export type RootTabParamList = {
   Practice: undefined;
   Profile: undefined;
 };
+
+export type PracticeStackParamList = {
+  PracticeHome: undefined;
+  Flashcard: undefined;
+};

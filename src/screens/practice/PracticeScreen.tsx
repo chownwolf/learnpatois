@@ -7,11 +7,14 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useProgressStore } from '../../store/useProgressStore';
 import { UNITS } from '../../data/units';
 import { Colors, Spacing, FontSize, BorderRadius, Shadow } from '../../constants/theme';
 import { StreakBadge } from '../../components/ui/StreakBadge';
 import { XPBadge } from '../../components/ui/XPBadge';
+import { PracticeStackParamList } from '../../types';
 
 interface PracticeMode {
   id: string;
@@ -37,7 +40,7 @@ const MODES: PracticeMode[] = [
     description: 'Quickly review vocabulary with flip cards',
     emoji: '🃏',
     color: Colors.purple,
-    available: false,
+    available: true,
   },
   {
     id: 'speed',
@@ -58,9 +61,14 @@ const MODES: PracticeMode[] = [
 ];
 
 export const PracticeScreen: React.FC = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<PracticeStackParamList>>();
   const completedLessons = useProgressStore((s) => s.completedLessons);
   const xp = useProgressStore((s) => s.xp);
   const streak = useProgressStore((s) => s.streak);
+
+  const handleModePress = (id: string) => {
+    if (id === 'flashcards') navigation.navigate('Flashcard');
+  };
 
   const completedCount = Object.keys(completedLessons).length;
   const totalLessons = UNITS.reduce((sum, u) => sum + u.lessons.length, 0);
@@ -103,6 +111,7 @@ export const PracticeScreen: React.FC = () => {
             style={[styles.modeCard, !mode.available && styles.modeCardDisabled]}
             activeOpacity={mode.available ? 0.8 : 1}
             disabled={!mode.available}
+            onPress={() => handleModePress(mode.id)}
           >
             <View style={[styles.modeIcon, { backgroundColor: mode.color + '20' }]}>
               <Text style={styles.modeEmoji}>{mode.emoji}</Text>

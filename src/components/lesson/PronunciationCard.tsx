@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { PronunciationExercise } from '../../types';
 import { Colors, Spacing, FontSize, BorderRadius, Shadow } from '../../constants/theme';
+import { useSpeech } from '../../hooks/useSpeech';
 
 interface Props {
   exercise: PronunciationExercise;
@@ -10,9 +11,11 @@ interface Props {
 
 export const PronunciationCard: React.FC<Props> = ({ exercise, onReady }) => {
   const [revealed, setRevealed] = useState(false);
+  const { speak } = useSpeech();
 
   const handleReveal = () => {
     setRevealed(true);
+    speak(exercise.patois);
     onReady();
   };
 
@@ -21,7 +24,16 @@ export const PronunciationCard: React.FC<Props> = ({ exercise, onReady }) => {
       <Text style={styles.label}>Learn this word</Text>
 
       <View style={styles.card}>
-        <Text style={styles.patois}>{exercise.patois}</Text>
+        <View style={styles.patoisRow}>
+          <Text style={styles.patois}>{exercise.patois}</Text>
+          <TouchableOpacity
+            style={styles.speakBtn}
+            onPress={() => speak(exercise.patois)}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.speakIcon}>🔊</Text>
+          </TouchableOpacity>
+        </View>
         <Text style={styles.phonetic}>/{exercise.phonetic}/</Text>
 
         <View style={styles.divider} />
@@ -68,12 +80,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     ...Shadow.button,
   },
+  patoisRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    marginBottom: 8,
+  },
   patois: {
     fontSize: 40,
     fontWeight: '900',
     color: Colors.charcoal,
     textAlign: 'center',
-    marginBottom: 8,
+  },
+  speakBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.blue + '15',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: Colors.blue + '40',
+  },
+  speakIcon: {
+    fontSize: FontSize.xl,
   },
   phonetic: {
     fontSize: FontSize.lg,

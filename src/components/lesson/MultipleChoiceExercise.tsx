@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MultipleChoiceExercise as MCExercise } from '../../types';
 import { Colors, Spacing, FontSize, BorderRadius, Shadow } from '../../constants/theme';
+import { useSpeech } from '../../hooks/useSpeech';
 
 interface Props {
   exercise: MCExercise;
@@ -25,6 +26,7 @@ export const MultipleChoiceExercise: React.FC<Props> = ({
   onSelect,
   showFeedback,
 }) => {
+  const { speak } = useSpeech();
   const options = useMemo(
     () => shuffle([exercise.correctAnswer, ...exercise.distractors]),
     [exercise.id]
@@ -54,7 +56,16 @@ export const MultipleChoiceExercise: React.FC<Props> = ({
 
       {exercise.type === 'multiple_choice' && exercise.direction === 'patois_to_english' && (
         <View style={styles.wordCard}>
-          <Text style={styles.patoisWord}>{exercise.patois}</Text>
+          <View style={styles.wordCardRow}>
+            <Text style={styles.patoisWord}>{exercise.patois}</Text>
+            <TouchableOpacity
+              style={styles.speakBtn}
+              onPress={() => speak(exercise.patois)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.speakIcon}>🔊</Text>
+            </TouchableOpacity>
+          </View>
           <Text style={styles.phonetic}>{exercise.phonetic}</Text>
         </View>
       )}
@@ -95,6 +106,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing.xl,
     ...Shadow.card,
+  },
+  wordCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    marginBottom: 4,
+  },
+  speakBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: Colors.blue + '15',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: Colors.blue + '40',
+  },
+  speakIcon: {
+    fontSize: FontSize.lg,
   },
   patoisWord: {
     fontSize: FontSize.xxl,
