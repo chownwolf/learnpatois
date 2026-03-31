@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,12 +6,22 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
+  Switch,
   Alert,
 } from 'react-native';
 import { useProgressStore } from '../../store/useProgressStore';
 import { UNITS } from '../../data/units';
 import { Colors, Spacing, FontSize, BorderRadius, Shadow } from '../../constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  scheduleDailyStreakReminder,
+  cancelStreakReminder,
+  isReminderScheduled,
+  requestNotificationPermission,
+} from '../../engine/notifications';
+
+const REMINDER_HOURS = [8, 12, 17, 19, 21];
+const REMINDER_LABELS = ['8 AM', '12 PM', '5 PM', '7 PM', '9 PM'];
 
 export const ProfileScreen: React.FC = () => {
   const xp = useProgressStore((s) => s.xp);
@@ -19,6 +29,38 @@ export const ProfileScreen: React.FC = () => {
   const hearts = useProgressStore((s) => s.hearts);
   const completedLessons = useProgressStore((s) => s.completedLessons);
   const refillHearts = useProgressStore((s) => s.refillHearts);
+
+  const [notificationsOn, setNotificationsOn] = useState(false);
+  const [reminderHourIndex, setReminderHourIndex] = useState(3); // default 7 PM
+
+  useEffect(() => {
+    isReminderScheduled().then(setNotificationsOn);
+  }, []);
+
+  const toggleNotifications = async (value: boolean) => {
+    if (value) {
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        Alert.alert(
+          'Permission Required',
+          'Please enable notifications for Patois in your device settings to receive streak reminders.'
+        );
+        return;
+      }
+      await scheduleDailyStreakReminder(REMINDER_HOURS[reminderHourIndex]);
+      setNotificationsOn(true);
+    } else {
+      await cancelStreakReminder();
+      setNotificationsOn(false);
+    }
+  };
+
+  const changeReminderTime = async (index: number) => {
+    setReminderHourIndex(index);
+    if (notificationsOn) {
+      await scheduleDailyStreakReminder(REMINDER_HOURS[index]);
+    }
+  };
 
   const totalLessons = UNITS.reduce((sum, u) => sum + u.lessons.length, 0);
   const completedCount = Object.keys(completedLessons).length;
@@ -133,8 +175,48 @@ export const ProfileScreen: React.FC = () => {
           );
         })}
 
-        {/* Actions */}
+        {/* Settings */}
         <Text style={styles.sectionLabel}>Settings</Text>
+
+        {/* Streak notifications toggle */}
+        <View style={styles.actionBtn}>
+          <Text style={styles.actionIcon}>🔔</Text>
+          <Text style={styles.actionText}>Daily Reminder</Text>
+          <Switch
+            value={notificationsOn}
+            onValueChange={toggleNotifications}
+            trackColor={{ false: Colors.lightGray, true: Colors.green + '80' }}
+            thumbColor={notificationsOn ? Colors.green : Colors.midGray}
+          />
+        </View>
+
+        {/* Reminder time picker — only visible when notifications are on */}
+        {notificationsOn && (
+          <View style={styles.timePickerCard}>
+            <Text style={styles.timePickerLabel}>Remind me at</Text>
+            <View style={styles.timePickerRow}>
+              {REMINDER_LABELS.map((label, i) => (
+                <TouchableOpacity
+                  key={label}
+                  style={[
+                    styles.timeChip,
+                    i === reminderHourIndex && styles.timeChipActive,
+                  ]}
+                  onPress={() => changeReminderTime(i)}
+                >
+                  <Text
+                    style={[
+                      styles.timeChipText,
+                      i === reminderHourIndex && styles.timeChipTextActive,
+                    ]}
+                  >
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
 
         {hearts < 5 && (
           <TouchableOpacity style={styles.actionBtn} onPress={refillHearts}>
@@ -342,6 +424,45 @@ const styles = StyleSheet.create({
   actionArrow: {
     fontSize: 24,
     color: Colors.midGray,
+  },
+  timePickerCard: {
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.green + '40',
+  },
+  timePickerLabel: {
+    fontSize: FontSize.sm,
+    color: Colors.midGray,
+    fontWeight: '600',
+    marginBottom: Spacing.sm,
+  },
+  timePickerRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+  },
+  timeChip: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 8,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.offWhite,
+    borderWidth: 1.5,
+    borderColor: Colors.lightGray,
+  },
+  timeChipActive: {
+    backgroundColor: Colors.green + '15',
+    borderColor: Colors.green,
+  },
+  timeChipText: {
+    fontSize: FontSize.sm,
+    fontWeight: '700',
+    color: Colors.midGray,
+  },
+  timeChipTextActive: {
+    color: Colors.green,
   },
   aboutCard: {
     backgroundColor: Colors.green + '15',
