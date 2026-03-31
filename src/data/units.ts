@@ -1,11 +1,30 @@
-import { Unit, Lesson } from '../types';
+import { Unit, Lesson, ListeningExercise } from '../types';
 import { unit1Lessons } from './lessons/unit1_greetings';
 import { unit2Lessons } from './lessons/unit2_numbers';
 import { unit3Lessons } from './lessons/unit3_family';
 import { unit4Lessons } from './lessons/unit4_food';
 import { unit5Lessons } from './lessons/unit5_phrases';
 import { unit6Lessons } from './lessons/unit6_proverbs';
+import {
+  unit1Listening,
+  unit2Listening,
+  unit3Listening,
+  unit4Listening,
+  unit5Listening,
+  unit6Listening,
+} from './lessons/listening_exercises';
 import { Colors } from '../constants/theme';
+
+// Distribute listening exercises evenly across a unit's lessons (2 per lesson)
+function withListening(lessons: Lesson[], listeningPool: ListeningExercise[]): Lesson[] {
+  return lessons.map((lesson, i) => ({
+    ...lesson,
+    exercises: [
+      ...lesson.exercises,
+      ...listeningPool.slice(i * 2, i * 2 + 2),
+    ],
+  }));
+}
 
 export const UNITS: Unit[] = [
   {
@@ -14,7 +33,7 @@ export const UNITS: Unit[] = [
     description: 'Learn how to greet people and use essential everyday phrases',
     emoji: '👋',
     color: Colors.unit1,
-    lessons: unit1Lessons,
+    lessons: withListening(unit1Lessons, unit1Listening),
     prerequisiteUnitId: null,
   },
   {
@@ -23,7 +42,7 @@ export const UNITS: Unit[] = [
     description: 'Count, tell time, and talk about days and dates',
     emoji: '🕐',
     color: Colors.unit2,
-    lessons: unit2Lessons,
+    lessons: withListening(unit2Lessons, unit2Listening),
     prerequisiteUnitId: 'unit_1',
   },
   {
@@ -32,7 +51,7 @@ export const UNITS: Unit[] = [
     description: 'Describe your family, friends, and feelings',
     emoji: '👨‍👩‍👧‍👦',
     color: Colors.unit3,
-    lessons: unit3Lessons,
+    lessons: withListening(unit3Lessons, unit3Listening),
     prerequisiteUnitId: 'unit_2',
   },
   {
@@ -41,7 +60,7 @@ export const UNITS: Unit[] = [
     description: 'Explore Jamaican cuisine and talk about eating and shopping',
     emoji: '🍽️',
     color: Colors.unit4,
-    lessons: unit4Lessons,
+    lessons: withListening(unit4Lessons, unit4Listening),
     prerequisiteUnitId: 'unit_3',
   },
   {
@@ -50,7 +69,7 @@ export const UNITS: Unit[] = [
     description: 'Master common expressions for daily life and conversations',
     emoji: '💬',
     color: Colors.unit5,
-    lessons: unit5Lessons,
+    lessons: withListening(unit5Lessons, unit5Listening),
     prerequisiteUnitId: 'unit_4',
   },
   {
@@ -59,7 +78,7 @@ export const UNITS: Unit[] = [
     description: 'Discover deep Jamaican wisdom, music, and Rastafari culture',
     emoji: '🌿',
     color: Colors.unit6,
-    lessons: unit6Lessons,
+    lessons: withListening(unit6Lessons, unit6Listening),
     prerequisiteUnitId: 'unit_5',
   },
 ];
@@ -75,4 +94,3 @@ export function getLessonById(lessonId: string): { lesson: Lesson; unit: Unit } 
   }
   return undefined;
 }
-

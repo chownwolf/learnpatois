@@ -39,8 +39,9 @@ export function useLesson(lesson: Lesson) {
         const a = typeof answer === 'string' ? answer.trim().toLowerCase() : '';
         correct = a === currentExercise.correctAnswer.toLowerCase();
       } else if (currentExercise.type === 'pronunciation') {
-        // Pronunciation cards are always "correct" — just revealed
         correct = true;
+      } else if (currentExercise.type === 'listening') {
+        correct = answer === currentExercise.correctAnswer;
       }
 
       setLastAnswerCorrect(correct);

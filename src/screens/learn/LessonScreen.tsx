@@ -19,6 +19,7 @@ import { MultipleChoiceExercise } from '../../components/lesson/MultipleChoiceEx
 import { TranslationExercise } from '../../components/lesson/TranslationExercise';
 import { FillBlankExercise } from '../../components/lesson/FillBlankExercise';
 import { PronunciationCard } from '../../components/lesson/PronunciationCard';
+import { ListeningExercise } from '../../components/lesson/ListeningExercise';
 import { Colors, Spacing, FontSize, BorderRadius } from '../../constants/theme';
 
 type Props = NativeStackScreenProps<LearnStackParamList, 'Lesson'>;
@@ -81,6 +82,7 @@ export const LessonScreen: React.FC<Props> = ({ route, navigation }) => {
       case 'multiple_choice': return currentExercise.correctAnswer;
       case 'translation': return currentExercise.correctTokens.join(' ');
       case 'fill_blank': return currentExercise.correctAnswer;
+      case 'listening': return currentExercise.correctAnswer;
       default: return '';
     }
   };
@@ -130,10 +132,18 @@ export const LessonScreen: React.FC<Props> = ({ route, navigation }) => {
             onReady={() => submitAnswer('ready')}
           />
         )}
+        {currentExercise?.type === 'listening' && (
+          <ListeningExercise
+            exercise={currentExercise}
+            selectedAnswer={typeof selectedAnswer === 'string' ? selectedAnswer : null}
+            onSelect={submitAnswer}
+            showFeedback={phase === 'feedback'}
+          />
+        )}
       </View>
 
       {/* Check button (only when not in feedback mode) */}
-      {phase === 'question' && currentExercise?.type !== 'pronunciation' && (
+      {phase === 'question' && currentExercise?.type !== 'pronunciation' && currentExercise?.type !== 'listening' && (
         <View style={styles.checkArea}>
           <TouchableOpacity
             style={[styles.checkBtn, !canCheck && styles.checkBtnDisabled]}

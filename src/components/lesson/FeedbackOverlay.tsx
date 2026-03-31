@@ -18,21 +18,56 @@ export const FeedbackOverlay: React.FC<Props> = ({
   onContinue,
 }) => {
   const translateY = useRef(new Animated.Value(200)).current;
+  const shakeAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const iconScale = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (visible) {
+      // Slide up
       Animated.spring(translateY, {
         toValue: 0,
         useNativeDriver: true,
         tension: 100,
         friction: 10,
       }).start();
+
+      // Icon pops in
+      Animated.spring(iconScale, {
+        toValue: 1,
+        tension: 200,
+        friction: 8,
+        useNativeDriver: true,
+      }).start();
+
+      if (correct) {
+        // Pulse bounce on correct
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 1.15, duration: 120, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 0.95, duration: 80, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1.05, duration: 60, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 60, useNativeDriver: true }),
+        ]).start();
+      } else {
+        // Shake on wrong
+        Animated.sequence([
+          Animated.timing(shakeAnim, { toValue: 10, duration: 60, useNativeDriver: true }),
+          Animated.timing(shakeAnim, { toValue: -10, duration: 60, useNativeDriver: true }),
+          Animated.timing(shakeAnim, { toValue: 8, duration: 50, useNativeDriver: true }),
+          Animated.timing(shakeAnim, { toValue: -8, duration: 50, useNativeDriver: true }),
+          Animated.timing(shakeAnim, { toValue: 4, duration: 40, useNativeDriver: true }),
+          Animated.timing(shakeAnim, { toValue: 0, duration: 40, useNativeDriver: true }),
+        ]).start();
+      }
     } else {
       Animated.timing(translateY, {
         toValue: 200,
         duration: 150,
         useNativeDriver: true,
       }).start();
+      iconScale.setValue(0);
+      shakeAnim.setValue(0);
+      pulseAnim.setValue(1);
     }
   }, [visible]);
 
@@ -40,12 +75,33 @@ export const FeedbackOverlay: React.FC<Props> = ({
 
   const bg = correct ? Colors.greenBg : Colors.redBg;
   const accent = correct ? Colors.green : Colors.red;
-  const btnColors = correct ? [Colors.green, Colors.greenDark] : [Colors.red, '#CC0000'];
 
   return (
-    <Animated.View style={[styles.container, { backgroundColor: bg, transform: [{ translateY }] }]}>
+    <Animated.View
+      style={[
+        styles.container,
+        {
+          backgroundColor: bg,
+          transform: [
+            { translateY },
+            { translateX: correct ? new Animated.Value(0) : shakeAnim },
+          ],
+        },
+      ]}
+    >
       <View style={styles.topRow}>
-        <Text style={[styles.icon]}>{correct ? '✅' : '❌'}</Text>
+        <Animated.Text
+          style={[
+            styles.icon,
+            {
+              transform: [
+                { scale: correct ? pulseAnim : iconScale },
+              ],
+            },
+          ]}
+        >
+          {correct ? '✅' : '❌'}
+        </Animated.Text>
         <Text style={[styles.status, { color: accent }]}>
           {correct ? 'Correct!' : 'Incorrect'}
         </Text>
@@ -58,9 +114,7 @@ export const FeedbackOverlay: React.FC<Props> = ({
         </View>
       )}
 
-      {note && (
-        <Text style={styles.note}>{note}</Text>
-      )}
+      {note && <Text style={styles.note}>{note}</Text>}
 
       <TouchableOpacity
         style={[styles.continueBtn, { backgroundColor: accent }]}

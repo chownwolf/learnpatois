@@ -16,6 +16,7 @@ import { useProgressStore } from '../../store/useProgressStore';
 import { UnitBubble } from '../../components/ui/UnitBubble';
 import { StreakBadge } from '../../components/ui/StreakBadge';
 import { XPBadge } from '../../components/ui/XPBadge';
+import { AnimatedBadge } from '../../components/ui/AnimatedBadge';
 import { Colors, Spacing, FontSize, BorderRadius, Shadow } from '../../constants/theme';
 
 type Props = NativeStackScreenProps<LearnStackParamList, 'LearnHome'>;
@@ -47,8 +48,12 @@ export const LearnHomeScreen: React.FC<Props> = ({ navigation }) => {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>🇯🇲 Patois</Text>
         <View style={styles.headerBadges}>
-          <StreakBadge streak={streak} />
-          <XPBadge xp={xp} />
+          <AnimatedBadge value={streak}>
+            <StreakBadge streak={streak} />
+          </AnimatedBadge>
+          <AnimatedBadge value={xp}>
+            <XPBadge xp={xp} />
+          </AnimatedBadge>
         </View>
       </View>
 

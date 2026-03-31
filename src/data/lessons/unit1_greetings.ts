@@ -1,4 +1,5 @@
 import { Lesson } from '../../types';
+import { unit1Listening } from './listening_exercises';
 
 export const unit1Lessons: Lesson[] = [
   {

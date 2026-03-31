@@ -1,4 +1,4 @@
-export type ExerciseType = 'multiple_choice' | 'translation' | 'fill_blank' | 'pronunciation';
+export type ExerciseType = 'multiple_choice' | 'translation' | 'fill_blank' | 'pronunciation' | 'listening';
 
 export interface BaseExercise {
   id: string;
@@ -36,11 +36,18 @@ export interface PronunciationExercise extends BaseExercise {
   type: 'pronunciation';
 }
 
+export interface ListeningExercise extends BaseExercise {
+  type: 'listening';
+  correctAnswer: string;   // the correct English meaning
+  distractors: string[];   // 3 wrong English meanings
+}
+
 export type Exercise =
   | MultipleChoiceExercise
   | TranslationExercise
   | FillBlankExercise
-  | PronunciationExercise;
+  | PronunciationExercise
+  | ListeningExercise;
 
 export interface Lesson {
   id: string;
